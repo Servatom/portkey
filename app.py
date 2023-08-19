@@ -9,7 +9,7 @@ import logging
 import redis
 
 app = Flask(__name__)
-redisHost = os.environ.get("REDIS_URL")
+redisHost = os.environ.get("REDIS_HOST")
 redisClient = redis.Redis(host=redisHost, port=6379, db=10)
 
 LOGGER = logging.getLogger(__name__)
