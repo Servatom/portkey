@@ -156,6 +156,15 @@ def get_bot_response(conversationID):
         LOGGER.info("Response created")
         bot_reply = response['choices'][0]['message']['content']
         # extract search_string from bot_reply
+        if "use this search string" in bot_reply or "search string" in bot_reply:
+            conversation.append({"role": "system", "content": "adhere to the format!!!"})
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=conversation,
+                max_tokens=100,
+            )
+            bot_reply = response['choices'][0]['message']['content']
+
         json_match = re.search(r"search_string = (.*)", bot_reply)
         if json_match:
             LOGGER.info("Final search term to be returned")
