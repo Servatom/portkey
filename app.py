@@ -153,6 +153,17 @@ def get_bot_response(conversationID):
 
         LOGGER.info("Response created")
         bot_reply = response['choices'][0]['message']['content']
+        # if the bot says give me a moment or wait then retry
+        if "give me a moment" in bot_reply or "wait" in bot_reply:
+            conversation.append(
+                {"role": "system", "content": "I am waiting. Please give definite response"}
+            )
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=conversation,
+                max_tokens=1000,
+            )
+            bot_reply = response['choices'][0]['message']['content']
         # extract search_string from bot_reply
         json_match = re.search(r"search_string=(.*)", bot_reply)
         if json_match:
