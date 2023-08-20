@@ -143,7 +143,7 @@ def get_bot_response(conversationID):
         for msg in user_input:
             conversation.append(msg)
         conversation.append(
-            {"role": "system", "content": "so this is how its going to work. You will keep asking questions like the budget, occassion, color, etc. With the above details provided about the user, and the chat you will have with the user, you will get to understand them properly. The user should feel that you are talking him/her. My job is to maintain the conversation context, and when you feel you have found the right search string for the user you will say: 'search_string'=<the search string> and I will take it from there. The search string will be used to search on some popular shopping sites"}
+            {"role": "system", "content": "So this is how its going to work. Keep this in mind. I am just a facilitator of a chat between you and the user. Whatever conversation you have, I will keep track of it. I will provide you the entire history. Your job is simple, get to know the user better. Understand their outfit requirement. Ask the budget, occassion, style. You will then give a search string which will be used to search on sites like flipkart, amazon. When you feel you have the right search string in mind, in the chat say search_string=<your search string>. I will then search for the products and return the results to the user. I will then end the conversation. Dont disappoint me."}
         )
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
