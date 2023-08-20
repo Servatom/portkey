@@ -158,7 +158,7 @@ def get_bot_response(conversationID):
         bot_reply = response['choices'][0]['message']['content']
         # extract search_string from bot_reply
         json_match = re.search(r"search_string=(.*)", bot_reply) or re.search(r"search_string = (.*)", bot_reply)
-        if "you can try searching" in bot_reply:
+        if "suggest searching for" in bot_reply:
             while not json_match:
                 conversation.append(
                     {"role": "system", "content": "Use the format: search_string = 'search_string'"}
