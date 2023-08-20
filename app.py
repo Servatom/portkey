@@ -84,7 +84,8 @@ class DiagonAlleyClient:
             LOGGER.error("Error in getting user profile")
         gender = response.json()["gender"]
         age = response.json()["age"]
-        return f"{gender} of age {age}"
+        name = response.json()["name"]
+        return f"{name} who is {gender} of age {age}"
 
 @app.route("/init", methods=['GET'])
 def init_conversation():
@@ -97,7 +98,7 @@ def init_conversation():
 
     conversation_init = [
         {"role": "system", "content": "You are an outfit recommender. You converse with the user, take in their suggestions and choices, ask for details, take their previous order history into account, and generate small search strings for them to search fashion websites"},
-        {"role": "system", "content": "Suggest clothes for a {}".format(diagon_alley.get_user_persona())}
+        {"role": "system", "content": "Suggest clothes for {}".format(diagon_alley.get_user_persona())}
     ]
 
     if len(products_bought) > 0:
@@ -142,7 +143,7 @@ def get_bot_response(conversationID):
         for msg in user_input:
             conversation.append(msg)
         conversation.append(
-            {"role": "system", "content": "so this is how its going to work. You will keep asking questions like the budget, occassion, color, etc. With the above details provided about the user, and the chat you will have with the user, you will get to understand them properly. When you feel you can generate an accurate search string for the user, you will say 'search_string = <search string>' and I will take it from there"}
+            {"role": "system", "content": "so this is how its going to work. You will keep asking questions like the budget, occassion, color, etc. With the above details provided about the user, and the chat you will have with the user, you will get to understand them properly. The user should feel that you are talking him/her. My job is to maintain the conversation context, and when you feel you have found the right search string for the user you will say: 'search_string'=<the search string> and I will take it from there. The search string will be used to search on some popular shopping sites"}
         )
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
