@@ -145,7 +145,7 @@ def get_bot_response(conversationID):
         for msg in user_input:
             conversation.append(msg)
         conversation.append(
-            {"role": "system", "content": "One last thing. If you have got to know the user well, and you have a search_string which I can use to search for products. Format it like this: search_string = \"<search_string>\""}
+            {"role": "system", "content": "One last thing. If you have got to know the user well, and you have a search_string which I can use to search for products. Format it like this: search_string = 'search_string' "}
         )
         conversation.append({"role": "system", "content": "Format when giving search string is: search_string='search_string'"})
         response = openai.ChatCompletion.create(
@@ -158,6 +158,18 @@ def get_bot_response(conversationID):
         bot_reply = response['choices'][0]['message']['content']
         # extract search_string from bot_reply
         json_match = re.search(r"search_string=(.*)", bot_reply) or re.search(r"search_string = (.*)", bot_reply)
+        if "you can try searching" in bot_reply:
+            while not json_match:
+                conversation.append(
+                    {"role": "system", "content": "Use the format: search_string = 'search_string'"}
+                )
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=conversation,
+                    max_tokens=100,
+                )
+                bot_reply = response['choices'][0]['message']['content']
+                json_match = re.search(r"search_string=(.*)", bot_reply) or re.search(r"search_string = (.*)", bot_reply)
         if json_match:
             LOGGER.info("Final search term to be returned")
             search_string = json_match.group(1)
