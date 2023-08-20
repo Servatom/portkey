@@ -156,7 +156,7 @@ def get_bot_response(conversationID):
         # if the bot says give me a moment or wait then retry
         if "give me a moment" in bot_reply or "wait" in bot_reply:
             conversation.append(
-                {"role": "system", "content": "I am waiting. Please give definite response"}
+                {"role": "system", "content": "I am waiting. Please give definite response. Either ask more questions, or say search_string=<searchstring>"}
             )
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
