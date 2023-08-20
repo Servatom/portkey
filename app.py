@@ -145,6 +145,9 @@ def get_bot_response(conversationID):
         conversation.append(
             {"role": "system", "content": "So this is how its going to work. I am just a facilitator of a chat between you and the user. Whatever conversation you have, I will keep track of it. You are talking to the user. When you know the right outfit to search on amazon or flipkart, just say 'search_string=your search string' and I will take care of the rest. I will search for the product and return the results to the user."}
         )
+        conversation.append(
+            {"role": "system", "content": "Remember when you need to provide search string say: search_string=<searchstring>"}
+        )
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=conversation,
