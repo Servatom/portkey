@@ -170,6 +170,8 @@ def get_bot_response(conversationID):
             return jsonify({"bot_reply_type": "search_results", "search_results": results_to_return})
 
         LOGGER.info("Continue conversation")
+        # delete the last message from the conversation
+        del conversation[-1]
         conversation.append({"role": "system", "content": bot_reply})
         print(conversation)
         redisClient.set(conversationID, str(conversation).encode('utf-8'), ex=86400)
