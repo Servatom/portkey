@@ -7,8 +7,10 @@ import re
 import requests
 import logging
 import redis
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 redisHost = os.environ.get("REDIS_HOST")
 redisClient = redis.Redis(host=redisHost, port=6379, db=0)
 
