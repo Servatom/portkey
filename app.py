@@ -110,7 +110,7 @@ def init_conversation():
     remainder_conversation = [
         {"role": "system", "content": "You have to ask users questions to get their preferences around colour, their budget, occasion"},
         {"role": "system", "content": "Get these details from users unless they tell you that they don't have a preference and then generate a search string"},
-        {"role": "system", "content": "Provide the search string only. The format of your reply should be: 'search_string = the search string'. Do not provide any other language"},
+        {"role": "system", "content": "Provide the search string only. The format of your reply should be: 'search_string = the search string'. Do not provide any other language. The search string should have the exact cloth article. For example, 'red shirt' or 'blue jeans'"},
         {"role": "system", "content": "The gender provided earlier is very important. Include it in the search string as well"}
     ]
 
