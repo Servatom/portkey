@@ -119,7 +119,7 @@ def init_conversation():
     redis_key = int(datetime.datetime.now().timestamp())
     # store json in redis
     conversation_to_bytes = str(conversation_init).encode('utf-8')
-    redisClient.set(redis_key, conversation_to_bytes)
+    redisClient.set(redis_key, conversation_to_bytes, ex=86400)
 
     return jsonify({"conversation_id": redis_key})
     
@@ -170,7 +170,7 @@ def get_bot_response(conversationID):
         LOGGER.info("Continue conversation")
         conversation.append({"role": "system", "content": bot_reply})
         print(conversation)
-        redisClient.set(conversationID, str(conversation).encode('utf-8'))
+        redisClient.set(conversationID, str(conversation).encode('utf-8'), ex=86400)
         return jsonify({"bot_reply_type": "text", "bot_reply": bot_reply})
     
     except Exception as e:
