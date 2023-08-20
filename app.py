@@ -155,7 +155,7 @@ def get_bot_response(conversationID):
         LOGGER.info("Response created")
         bot_reply = response['choices'][0]['message']['content']
         # extract search_string from bot_reply
-        json_match = re.search(r"search_string=(.*)", bot_reply)
+        json_match = re.search(r"search_string=(.*)", bot_reply) or re.search(r"search_string = (.*)", bot_reply)
         if json_match:
             LOGGER.info("Final search term to be returned")
             search_string = json_match.group(1)
