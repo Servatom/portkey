@@ -117,8 +117,6 @@ def init_conversation():
     ]
 
     conversation_init.extend(remainder_conversation)
-
-    print(conversation_init)
     # generate a unique code
     redis_key = int(datetime.datetime.now().timestamp())
     # store json in redis
