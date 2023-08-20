@@ -143,9 +143,9 @@ def get_bot_response(conversationID):
         for msg in user_input:
             conversation.append(msg)
         conversation.append(
-            {"role": "system", "content": "One last thing. If you have got to know the user well, and you have a search_string which I can use to search for products. Format it like this: search_string = \"<search_string>\""},
-            {"role": "system", "content": "Format when giving search string is: search_string='<search_string>'"}
+            {"role": "system", "content": "One last thing. If you have got to know the user well, and you have a search_string which I can use to search for products. Format it like this: search_string = \"<search_string>\""}
         )
+        conversation.append({"role": "system", "content": "Format when giving search string is: search_string='<search_string>'"})
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=conversation,
