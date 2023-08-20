@@ -142,6 +142,9 @@ def get_bot_response(conversationID):
 
         for msg in user_input:
             conversation.append(msg)
+        conversation.append(
+            {"role": "system", "content": "Provide the search string only. The format of your reply should be: 'search_string = the search string'. Do not suggest the attire in the chat itself. Just give me the search string which I will then put on a shopping site"},
+        )
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=conversation,
