@@ -103,6 +103,7 @@ def init_conversation():
     if len(products_bought) > 0:
         conversation_init.append({"role": "system", "content": "You are going to be provided with the user's previously ordered products. This will help you to understand them more"})
         conversation_init.append({"role": "system", "content": "The user has bought the following products in the past: {}".format(Product.multi_product_to_string(products_bought))})
+        conversation_init.append({"role": "system", "content": "You can use the name, color and price to estimate the kind of user preference. You can still ask these questions to the user, but this might influence your search string"})
     
     remainder_conversation = [
         {"role": "system", "content": "You have to ask users questions to get their preferences around colour, their budget, occasion"},
