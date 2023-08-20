@@ -93,15 +93,17 @@ class DiagonAlleyClient:
 def init_conversation():
     # check headers for bearer token
     bearer_token = request.headers.get('Authorization')
-    conversation_init = []
+    conversation_init = [
+        {"role": "system", "content": "You are an outfit recommender. You converse with the user, take in their suggestions and choices, ask for details, take their previous order history into account, and generate small search strings for them to search fashion websites"},
+    ]
+    products_bought = []
     if bearer_token:
         diagon_alley = DiagonAlleyClient(bearer_token)
         products_bought = diagon_alley.user_product_history()
 
-        conversation_init = [
-            {"role": "system", "content": "You are an outfit recommender. You converse with the user, take in their suggestions and choices, ask for details, take their previous order history into account, and generate small search strings for them to search fashion websites"},
+        conversation_init.append(
             {"role": "system", "content": "Suggest clothes for {}".format(diagon_alley.get_user_persona())}
-        ]
+        )
 
     if len(products_bought) > 0:
         conversation_init.append({"role": "system", "content": "You are going to be provided with the user's previously ordered products. This will help you to understand them more"})
