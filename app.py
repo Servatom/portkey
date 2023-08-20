@@ -7,8 +7,10 @@ import re
 import requests
 import logging
 import redis
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 redisHost = os.environ.get("REDIS_HOST")
 redisClient = redis.Redis(host=redisHost, port=6379, db=0)
 
@@ -181,6 +183,18 @@ def get_bot_response(conversationID):
     
     except Exception as e:
         return jsonify({"error": str(e)})
+
+@app.route('/chat_export/<conversationID>', methods=['GET'])
+def export_chat(conversationID):
+    if not conversationID:
+        return jsonify({"error": "No conversation ID found"})
+    # get conversation from redis
+    conversation = redisClient.get(conversationID)
+    if not conversation:
+        return jsonify({"error": "Conversation not found"})
+    conversation = conversation.decode('utf-8')
+    conversation = eval(conversation)
+    return jsonify({"conversation": conversation})
 
 if __name__ == '__main__':
     app.run(
