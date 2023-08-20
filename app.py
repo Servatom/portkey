@@ -108,7 +108,6 @@ def init_conversation():
     remainder_conversation = [
         {"role": "system", "content": "You have to ask users questions to get their preferences around colour, their budget, occasion"},
         {"role": "system", "content": "Get these details from users unless they tell you that they don't have a preference and then generate a search string"},
-        {"role": "system", "content": "Provide the search string only. The format of your reply should be: 'search_string = the search string'. Do not provide any other language"},
         {"role": "system", "content": "The gender provided earlier is very important. Include it in the search string as well"}
     ]
 
@@ -143,7 +142,7 @@ def get_bot_response(conversationID):
         for msg in user_input:
             conversation.append(msg)
         conversation.append(
-            {"role": "system", "content": "Provide the search string only or ask further questions. Its important to create some conversation. Ask the color, occassion etc. The format of your reply should be: 'search_string = the search string'. Do not suggest the attire in the chat itself. Just give me the search string which I will then put on a shopping site. Also keep the user's gender and age in mind"},
+            {"role": "system", "content": "so this is how its going to work. You will keep asking questions like the budget, occassion, color, etc. With the above details provided about the user, and the chat you will have with the user, you will get to understand them properly. When you feel you can generate an accurate search string for the user, you will say 'search string = <search string>' and I will take it from there"}
         )
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
