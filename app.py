@@ -7,10 +7,8 @@ import re
 import requests
 import logging
 import redis
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
 redisHost = os.environ.get("REDIS_HOST")
 redisClient = redis.Redis(host=redisHost, port=6379, db=0)
 
@@ -86,24 +84,21 @@ class DiagonAlleyClient:
             LOGGER.error("Error in getting user profile")
         gender = response.json()["gender"]
         age = response.json()["age"]
-        name = response.json()["name"]
-        return f"{name} who is a {gender} of age {age}"
+        return f"{gender} of age {age}"
 
 @app.route("/init", methods=['GET'])
 def init_conversation():
     # check headers for bearer token
     bearer_token = request.headers.get('Authorization')
+    if not bearer_token:
+        return jsonify({"error": "No bearer token found"})
+    diagon_alley = DiagonAlleyClient(bearer_token)
+    products_bought = diagon_alley.user_product_history()
+
     conversation_init = [
         {"role": "system", "content": "You are an outfit recommender. You converse with the user, take in their suggestions and choices, ask for details, take their previous order history into account, and generate small search strings for them to search fashion websites"},
+        {"role": "system", "content": "Suggest clothes for a {}".format(diagon_alley.get_user_persona())}
     ]
-    products_bought = []
-    if bearer_token:
-        diagon_alley = DiagonAlleyClient(bearer_token)
-        products_bought = diagon_alley.user_product_history()
-
-        conversation_init.append(
-            {"role": "system", "content": "Suggest clothes for {}".format(diagon_alley.get_user_persona())}
-        )
 
     if len(products_bought) > 0:
         conversation_init.append({"role": "system", "content": "You are going to be provided with the user's previously ordered products. This will help you to understand them more"})
@@ -113,10 +108,13 @@ def init_conversation():
     remainder_conversation = [
         {"role": "system", "content": "You have to ask users questions to get their preferences around colour, their budget, occasion"},
         {"role": "system", "content": "Get these details from users unless they tell you that they don't have a preference and then generate a search string"},
+        {"role": "system", "content": "Provide the search string only. The format of your reply should be: 'search_string = the search string'. Do not provide any other language"},
         {"role": "system", "content": "The gender provided earlier is very important. Include it in the search string as well"}
     ]
 
     conversation_init.extend(remainder_conversation)
+
+    print(conversation_init)
     # generate a unique code
     redis_key = int(datetime.datetime.now().timestamp())
     # store json in redis
@@ -145,10 +143,8 @@ def get_bot_response(conversationID):
         for msg in user_input:
             conversation.append(msg)
         conversation.append(
-            {"role": "system", "content": "One last thing. If you have got to know the user well, and you have a search_string which I can use to search for products. Format it like this: search_string = 'search_string' "}
+            {"role": "system", "content": "Provide the search string only or ask further questions. Its important to create some conversation. Ask the color, occassion etc. The format of your reply should be: 'search_string = the search string'. Do not suggest the attire in the chat itself. Just give me the search string which I will then put on a shopping site. Also keep the user's gender and age in mind"},
         )
-        conversation.append({"role": "system", "content": "Format when giving search string is: search_string='search_string'"})
-        conversation.append({"role": "system", "content": "I have provided the user gender and age above...no need to ask the user. Whatever you reply the user will see."})
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=conversation,
@@ -158,19 +154,7 @@ def get_bot_response(conversationID):
         LOGGER.info("Response created")
         bot_reply = response['choices'][0]['message']['content']
         # extract search_string from bot_reply
-        json_match = re.search(r"search_string=(.*)", bot_reply) or re.search(r"search_string = (.*)", bot_reply)
-        if "suggest searching for" in bot_reply:
-            while not json_match:
-                conversation.append(
-                    {"role": "system", "content": "Use the format: search_string = 'search_string'"}
-                )
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=conversation,
-                    max_tokens=100,
-                )
-                bot_reply = response['choices'][0]['message']['content']
-                json_match = re.search(r"search_string=(.*)", bot_reply) or re.search(r"search_string = (.*)", bot_reply)
+        json_match = re.search(r"search_string = (.*)", bot_reply)
         if json_match:
             LOGGER.info("Final search term to be returned")
             search_string = json_match.group(1)
@@ -187,8 +171,6 @@ def get_bot_response(conversationID):
             return jsonify({"bot_reply_type": "search_results", "search_results": results_to_return})
 
         LOGGER.info("Continue conversation")
-        # delete the last message from the conversation
-        del conversation[-1]
         conversation.append({"role": "system", "content": bot_reply})
         print(conversation)
         redisClient.set(conversationID, str(conversation).encode('utf-8'), ex=86400)
@@ -196,18 +178,6 @@ def get_bot_response(conversationID):
     
     except Exception as e:
         return jsonify({"error": str(e)})
-
-@app.route('/chat_export/<conversationID>', methods=['GET'])
-def export_chat(conversationID):
-    if not conversationID:
-        return jsonify({"error": "No conversation ID found"})
-    # get conversation from redis
-    conversation = redisClient.get(conversationID)
-    if not conversation:
-        return jsonify({"error": "Conversation not found"})
-    conversation = conversation.decode('utf-8')
-    conversation = eval(conversation)
-    return jsonify({"conversation": conversation})
 
 if __name__ == '__main__':
     app.run(
