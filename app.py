@@ -85,7 +85,7 @@ class DiagonAlleyClient:
         gender = response.json()["gender"]
         age = response.json()["age"]
         name = response.json()["name"]
-        return f"{name} who is {gender} of age {age}"
+        return f"{name} who is a {gender} of age {age}"
 
 @app.route("/init", methods=['GET'])
 def init_conversation():
@@ -143,32 +143,18 @@ def get_bot_response(conversationID):
         for msg in user_input:
             conversation.append(msg)
         conversation.append(
-            {"role": "system", "content": "So this is how its going to work. I am just a facilitator of a chat between you and the user. Whatever conversation you have, I will keep track of it. You are talking to the user. When you know the right outfit to search on amazon or flipkart, just say 'search_string=your search string' and I will take care of the rest. I will search for the product and return the results to the user."}
-        )
-        conversation.append(
-            {"role": "system", "content": "Remember when you need to provide search string say: search_string=<searchstring>"}
+            {"role": "system", "content": "so this is how its going to work. You will keep asking questions like the budget, occassion, color, etc. With the above details provided about the user, and the chat you will have with the user, you will get to understand them properly. When you feel you can generate an accurate search string for the user, you will say 'search string = <search string>' and I will take it from there"}
         )
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=conversation,
-            max_tokens=1000,
+            max_tokens=100,
         )
 
         LOGGER.info("Response created")
         bot_reply = response['choices'][0]['message']['content']
-        # if the bot says give me a moment or wait then retry
-        if "give me a moment" in bot_reply or "wait" in bot_reply:
-            conversation.append(
-                {"role": "system", "content": "I am waiting. Please give definite response. Either ask more questions, or say search_string=<searchstring>"}
-            )
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=conversation,
-                max_tokens=1000,
-            )
-            bot_reply = response['choices'][0]['message']['content']
         # extract search_string from bot_reply
-        json_match = re.search(r"search_string=(.*)", bot_reply)
+        json_match = re.search(r"search_string = (.*)", bot_reply)
         if json_match:
             LOGGER.info("Final search term to be returned")
             search_string = json_match.group(1)
